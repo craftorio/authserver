@@ -140,9 +140,11 @@ class Authenticator implements AuthenticatorInterface
     public function authenticateByPassword(AccountInterface $account, string $password, string $clientToken): ?array
     {
         if ($this->checkPassword($account, $password)) {
-            $accessToken = $this->getAccessToken();
+            $accessToken = $this->generateAccessToken();
             $sessions = $this->getSessionStore()->findBy(['accountUuid', '=', $account->getUuid()]);
             $currentSession = current($sessions);
+
+            // Delete outdated sessions
             if (count($sessions) > 1) {
                 foreach ($sessions as $session) {
                     if ($currentSession['_id'] != $session['_id']) {
@@ -151,6 +153,7 @@ class Authenticator implements AuthenticatorInterface
                 }
             }
 
+            // Update or create session
             if ($currentSession) {
                 $this->getSessionStore()->updateById($currentSession['_id'], [
                     'accountId'   => $account->getId(),
@@ -180,7 +183,7 @@ class Authenticator implements AuthenticatorInterface
     /**
      * @return string
      */
-    private function getAccessToken(): string
+    private function generateAccessToken(): string
     {
         $chars    = "0123456789abcdef";
         $max      = 64;
