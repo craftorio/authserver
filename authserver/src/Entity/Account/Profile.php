@@ -10,6 +10,7 @@ use Ramsey\Uuid\Uuid;
  */
 class Profile implements ProfileInterface
 {
+    private $id;
     private $uuid;
     private $name;
 
@@ -21,6 +22,15 @@ class Profile implements ProfileInterface
     {
         $this->uuid = (string) $rawData['uuid'] ?? Uuid::uuid4();
         $this->name = (string) $rawData['name'] ?? 'Unnamed';
+        $this->id = md5($this->uuid);
+    }
+
+    /**
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->getId();
     }
 
     /**
@@ -40,11 +50,12 @@ class Profile implements ProfileInterface
     }
 
     /**
-     *
+     * @return array
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return [
+            'id' => $this->id,
             'uuid' => $this->uuid,
             'name' => $this->name,
         ];

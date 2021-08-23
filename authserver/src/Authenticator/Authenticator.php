@@ -202,32 +202,13 @@ class Authenticator implements AuthenticatorInterface
      */
     private function accountToArray(AccountInterface $account): array
     {
-        $availableProfiles = [];
-        foreach ($account->getProfiles() as $profile) {
-            $availableProfiles[] = $this->profileToArray($profile);
-        }
-        $selectedProfile = $this->profileToArray($account->getSelectedProfile());
-
         return [
-            "availableProfiles" => $availableProfiles,
-            "selectedProfile" => $selectedProfile,
+            "availableProfiles" => $account->getProfiles(),
+            "selectedProfile" => $account->getSelectedProfile(),
             "user" => [
                 "id" => md5($account->getUuid() ?? $account->getId()),
                 "username" => "sergey@cherepanov.org.ua",
             ]
-        ];
-    }
-
-
-    /**
-     * @param ProfileInterface $profile
-     * @return array
-     */
-    private function profileToArray(ProfileInterface $profile): array
-    {
-        return [
-            'id' => md5($profile->getUuid()),
-            'name' => $profile->getName(),
         ];
     }
 

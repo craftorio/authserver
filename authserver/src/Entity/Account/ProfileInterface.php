@@ -8,6 +8,8 @@ namespace Craftorio\Authserver\Entity\Account;
  */
 interface ProfileInterface extends \JsonSerializable
 {
+    public function getId(): string;
+
     /**
      * @return string
      */
