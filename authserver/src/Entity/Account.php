@@ -1,0 +1,132 @@
+<?php
+
+namespace Craftorio\Authserver\Entity;
+
+use Craftorio\Authserver\Entity\Account\Profile;
+use Craftorio\Authserver\Entity\Account\ProfileInterface;
+use Ramsey\Uuid\Uuid;
+
+/**
+ * Class Account
+ * @package Craftorio\Authserver
+ */
+class Account implements AccountInterface
+{
+    private $id;
+    private $uuid;
+    private $username;
+    private $email;
+    private $passwordHash;
+    private $ipAddress;
+    private $selectedProfile;
+
+    /**
+     * Account constructor.
+     * @param array $rawData
+     */
+    public function __construct(array $rawData = [])
+    {
+        $this->id = $rawData['_id'] ?? $rawData['id'] ?? null;
+        $this->uuid = $rawData['uuid'] ?? $this->id ? Uuid::fromString(md5($this->id)) : Uuid::uuid4();
+        $this->username = $rawData['username'] ?? null;
+        $this->email = $rawData['email'] ?? null;
+        $this->passwordHash = $rawData['password_hash'] ?? null;
+        $this->ipAddress = $rawData['ip_address'] ?? null;
+
+        if (!$this->email || !$this->username || !$this->passwordHash) {
+            throw new \RuntimeException('Following fields are required: email, username, password_hash');
+        }
+
+        if (!empty($rawData['selected_profile'])) {
+            $this->selectedProfile = !empty($rawData['selected_profile']) ? new Profile($rawData['selected_profile']) : null;
+        } else {
+            $this->selectedProfile = new Profile([
+                'uuid' => Uuid::fromString(md5($this->uuid)),
+                'name' => ucfirst($this->username)
+            ]);
+        }
+
+        if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
+            throw new \RuntimeException('Invalid email address: "' . $this->email . '"');
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPasswordHash(): ?string
+    {
+        return $this->passwordHash;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIpAddress(): ?string
+    {
+        return $this->ipAddress;
+    }
+
+    /**
+     * @return ProfileInterface
+     */
+    public function getSelectedProfile(): ?ProfileInterface
+    {
+        return $this->selectedProfile;
+    }
+
+    /**
+     * @return ProfileInterface[]
+     */
+    public function getProfiles(): array
+    {
+        return [$this->getSelectedProfile()];
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'uuid' => $this->getUuid(),
+            'username' => $this->getUsername(),
+            'email' => $this->getEmail(),
+            'password_hash' => $this->getPasswordHash(),
+            'ip_address' => $this->getIpAddress(),
+            'selected_profile' => $this->getSelectedProfile()
+        ];
+    }
+}
