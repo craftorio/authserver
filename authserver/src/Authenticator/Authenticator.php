@@ -282,7 +282,7 @@ class Authenticator implements AuthenticatorInterface
         }
 
         return [
-            'id' => md5($account->getUuid() ?? $account->getId()),
+            'id' => $account->getSelectedProfile()->getId(),
             'name' => $account->getUsername(),
             'properties' => $this->getProperties($account)
         ];
@@ -348,7 +348,7 @@ class Authenticator implements AuthenticatorInterface
         return base64_encode(
             json_encode([
                 'timestamp' => $timestamp,
-                'profileId' => md5($account->getSelectedProfile()->getUuid()),
+                'profileId' => $account->getSelectedProfile()->getId(),
                 'profileName' => $account->getSelectedProfile()->getName(),
                 'textures' => $textures,
             ], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
