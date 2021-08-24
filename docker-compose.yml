@@ -6,8 +6,6 @@ services:
         deploy:
             restart_policy:
                 condition: any
-                max_attempts: 3
-                delay: 5s
         volumes:
             - 'authserver-composer-home:/tmp/.composer'
             - './authserver:/var/www/authserver'
@@ -26,8 +24,6 @@ services:
         deploy:
             restart_policy:
                 condition: any
-                max_attempts: 3
-                delay: 5s
         volumes:
             - 'authserver-composer-home:/tmp/.composer'
             - './authserver:/var/www/authserver'
@@ -53,8 +49,6 @@ services:
         deploy:
             restart_policy:
                 condition: any
-                max_attempts: 3
-                delay: 5s
         environment:
             NGINX_GEOIP: 'off'
             NGINX_PAGESPEED: 'on'
@@ -84,8 +78,6 @@ services:
         deploy:
             restart_policy:
                 condition: any
-                max_attempts: 3
-                delay: 5s
         ports:
             - "${DOCKER_PORT_MAIL_HTTP:-8175}:8025"
         networks:
