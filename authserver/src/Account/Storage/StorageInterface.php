@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Craftorio\Authserver\Account\Storage;
 
 use Craftorio\Authserver\Entity\AccountInterface;

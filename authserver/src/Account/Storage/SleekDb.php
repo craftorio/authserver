@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Craftorio\Authserver\Account\Storage;
 
 use Craftorio\Authserver\Entity\Account;
@@ -11,7 +13,7 @@ use SleekDB\Query;
  * Interface StorageInterface
  * @package Craftorio\Authserver\AccountStorage
  */
-class SleekDb implements StorageInterface
+class SleekDb extends StorageAbstract
 {
     private $accountsStore;
 
@@ -25,7 +27,8 @@ class SleekDb implements StorageInterface
     public function __construct(Config $config)
     {
         $baseDir = $config->get('baseDir');
-        $baseDataDir = $config->get('sleekDb.dataDir');
+        $baseDataDir = $config->get('account.sleekdb.data_dir') ?? 'var' . DIRECTORY_SEPARATOR .'storage';
+        $cacheLifetime = $config->get('account.sleekdb.cache_lifetime') ?? 900;
         $dataDir =  $baseDir . DIRECTORY_SEPARATOR . $baseDataDir;
         if (!is_dir($dataDir)) {
             mkdir($dataDir, 0755, true);
@@ -33,7 +36,7 @@ class SleekDb implements StorageInterface
 
         $accountsConfig = [
             "auto_cache" => true,
-            "cache_lifetime" => null,
+            "cache_lifetime" => $cacheLifetime,
             "timeout" => false,
             "primary_key" => "_id",
             "search" => [
@@ -87,6 +90,17 @@ class SleekDb implements StorageInterface
     }
 
     /**
+     * @param string $externalId
+     * @return AccountInterface|null
+     * @throws \SleekDB\Exceptions\IOException
+     * @throws \SleekDB\Exceptions\InvalidArgumentException
+     */
+    public function findByExternalId(string $externalId): ?AccountInterface
+    {
+        return $this->accountOrNull($this->accountsStore->findOneBy(["external_id", "=", $externalId]));
+    }
+
+    /**
      * @param string $username
      * @return AccountInterface|null
      * @throws \SleekDB\Exceptions\IOException
@@ -106,34 +120,5 @@ class SleekDb implements StorageInterface
     public function findByEmail(string $email): ?AccountInterface
     {
         return $this->accountOrNull($this->accountsStore->findOneBy(["email", "=", $email]));
-    }
-
-    /**
-     * @param array|null $data
-     * @return AccountInterface|null
-     */
-    private function accountOrNull(?array $data): ?AccountInterface
-    {
-        if (is_array($data) && $data) {
-            return new Account($data);
-        }
-
-        return null;
-    }
-
-    /**
-     * @param \JsonSerializable $object
-     * @return array
-     */
-    public function toArray(\JsonSerializable $object): array
-    {
-        $array = $object->jsonSerialize();
-        foreach ($array as $key => $value) {
-            if (is_object($value) && $value instanceof \JsonSerializable) {
-                $array[$key] = $this->toArray($value);
-            }
-        }
-
-        return $array;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Craftorio\Authserver\Command\Account;
 
 use Craftorio\Authserver\Entity\Account;

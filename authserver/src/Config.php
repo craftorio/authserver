@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Craftorio\Authserver;
 
 use Noodlehaus\AbstractConfig;
@@ -16,6 +18,14 @@ class Config extends AbstractConfig
     {
         $this->baseDir = realpath(__DIR__ . '/../');
 
+        $dotenv = \Dotenv\Dotenv::createImmutable($this->baseDir);
+        $dotenv->safeLoad();
+
+        if (is_readable($this->baseDir . DIRECTORY_SEPARATOR . 'config.php')) {
+            $localConfig = require($this->baseDir . DIRECTORY_SEPARATOR . 'config.php');
+            $data = array_merge_recursive($data, $localConfig);
+        }
+
         parent::__construct($data);
     }
 
@@ -26,14 +36,14 @@ class Config extends AbstractConfig
     {
         return [
             'baseDir' => $this->baseDir,
+            'account' => [
+                'storage' => 'sleekdb',
+            ],
             'certificatesDir' => $this->baseDir
                 . DIRECTORY_SEPARATOR
                 . 'var'
                 . DIRECTORY_SEPARATOR
                 . 'certificates',
-            'sleekDb' => [
-                'dataDir' => 'var/storage'
-            ],
             'classAuthenticator' => \Craftorio\Authserver\Authenticator\Authenticator::class,
             'classAccountStorage' => \Craftorio\Authserver\Account\Storage\SleekDb::class,
         ];

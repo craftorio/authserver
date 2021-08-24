@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Craftorio\Authserver\Authenticator;
 
 use Craftorio\Authserver\Entity\AccountInterface;
@@ -22,6 +24,13 @@ interface AuthenticatorInterface
      * @return string
      */
     public function hashPassword(string $password): string;
+
+    /**
+     * @param AccountInterface $account
+     * @param string $clientToken
+     * @return array|null
+     */
+    public function refreshSession(AccountInterface $account, string $clientToken): ?array;
 
     /**
      * @param AccountInterface $account

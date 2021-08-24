@@ -7,30 +7,38 @@ namespace Craftorio\Authserver\Route;
 use Craftorio\Authserver\Entity\AccountInterface;
 use Craftorio\Authserver\Account\Storage\StorageInterface;
 use Craftorio\Authserver\Authenticator\AuthenticatorInterface;
+use Craftorio\Authserver\Session;
 
 /**
  * Interface StorageInterface
  * @package Craftorio\Authserver\AccountStorage
  */
-class Authenticate implements RouteInterface
+class Refresh implements RouteInterface
 {
     private $storage;
     private $authenticator;
+    private $session;
 
     /**
-     * Authenticate constructor.
+     * Refresh constructor.
+     *
      * @param StorageInterface $storage
      * @param AuthenticatorInterface $authenticator
+     * @param Session $session
      */
-    public function __construct(StorageInterface $storage, AuthenticatorInterface $authenticator)
+    public function __construct(StorageInterface $storage, AuthenticatorInterface $authenticator, Session $session)
     {
         $this->storage = $storage;
         $this->authenticator = $authenticator;
+        $this->session = $session;
     }
 
+    /**
+     * @return string
+     */
     public function getPath(): string
     {
-        return 'POST /authenticate';
+        return 'POST /refresh';
     }
 
     /**
@@ -40,11 +48,10 @@ class Authenticate implements RouteInterface
     public function __invoke(...$args)
     {
         $payload = \Flight::request()->data;
-        $username = $payload['username'] ?? null;
-        $password = $payload['password'] ?? null;
-        $clientToken = $payload['clientToken']  ?? null;
+        $accessToken = $payload['accessToken'] ?? null;
+        $clientToken = $payload['clientToken'] ?? null;
 
-        if (!$username || !$password || !$clientToken) {
+        if (!$accessToken || !$clientToken) {
             \Flight::response()->status(400)->send();
             \Flight::json([
                 "error" => "InvalidRequestException", // Package ca.uhn.fhir.rest.server.exceptions
@@ -54,7 +61,22 @@ class Authenticate implements RouteInterface
             return;
         }
 
-        $account = $this->loadAccount($username);
+        $session = $this->session->getSessionStore()->findOneBy([
+            ['accessToken', '=', $accessToken],
+            'AND',
+            ['clientToken', '=', $clientToken],
+        ]);
+
+        if (!$session) {
+            \Flight::json([
+                "error" => "ForbiddenOperationException", // Package ca.uhn.fhir.rest.server.exceptions
+                "errorMessage" => "Invalid credentials. Invalid username or password."
+            ], 403);
+
+            return;
+        }
+
+        $account = $this->storage->findById($session['accountId']);
         if (!$account) {
             \Flight::json([
                 "error" => "ForbiddenOperationException", // Package ca.uhn.fhir.rest.server.exceptions
@@ -64,7 +86,7 @@ class Authenticate implements RouteInterface
             return;
         }
 
-        $sessionInfo = $this->authenticator->authenticateByPassword($account, $password, $clientToken);
+        $sessionInfo = $this->authenticator->refreshSession($account, $clientToken);
         if (!$sessionInfo) {
             \Flight::json([
                 "error" => "ForbiddenOperationException",
@@ -75,18 +97,5 @@ class Authenticate implements RouteInterface
         }
 
         \Flight::json($sessionInfo);
-    }
-
-    /**
-     * @param string $username
-     * @return AccountInterface|null
-     */
-    private function loadAccount(string $username): ?AccountInterface
-    {
-        if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
-            return $this->storage->findByEmail($username);
-        }
-
-        return $this->storage->findByUsername($username);
     }
 }

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Craftorio\Authserver\Authenticator;
 
 use Craftorio\Authserver\Authenticator\Exception\UnauthorizedException;
 use Craftorio\Authserver\Config;
-use Craftorio\Authserver\Entity\Account\ProfileInterface;
 use Craftorio\Authserver\Entity\AccountInterface;
+use Craftorio\Authserver\Hash\HashInterface;
 use Craftorio\Authserver\Session;
 use Craftorio\Authserver\Skin;
 use Craftorio\Authserver\Account\Storage\StorageInterface;
@@ -16,10 +18,6 @@ use Craftorio\Authserver\Account\Storage\StorageInterface;
  */
 class Authenticator implements AuthenticatorInterface
 {
-    private const CHARS_LOWERS = 'abcdefghijklmnopqrstuvwxyz';
-    private const CHARS_UPPERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    private const CHARS_DIGITS = '0123456789';
-
     private $hash;
     private $config;
     private $accountStorage;
@@ -28,14 +26,14 @@ class Authenticator implements AuthenticatorInterface
 
     /**
      * Authenticator constructor.
-     * @param \Phpass\Hash $hash
+     * @param HashInterface $hash
      * @param Config $config
      * @param StorageInterface $accountStorage
      * @param Session $session
      * @param Skin $skin
      */
     public function __construct(
-        \Phpass\Hash $hash,
+        HashInterface $hash,
         Config $config,
         StorageInterface $accountStorage,
         Session $session,
@@ -88,11 +86,7 @@ class Authenticator implements AuthenticatorInterface
      */
     public function checkPassword(AccountInterface $account, string $password): bool
     {
-        $parts = explode(':', $account->getPasswordHash());
-        $hash = $parts[0] ?? '';
-        $salt = $parts[1] ?? '';
-
-        return $this->hash->checkPassword($salt . $password, $hash);
+        return $this->hash->checkPassword($account, $password);
     }
 
     /**
@@ -102,28 +96,56 @@ class Authenticator implements AuthenticatorInterface
      */
     public function hashPassword(string $password): string
     {
-        $salt = $this->getRandomString();
-        $hash = $this->hash->hashPassword($salt . $password);
-
-        return "{$hash}:{$salt}";
+        return $this->hash->hashPassword($password);
     }
 
     /**
-     * @param int $len
-     * @param null $chars
-     * @return string
-     * @throws \Exception
+     * @param AccountInterface $account
+     * @param string $clientToken
+     * @return array|null
+     * @throws \SleekDB\Exceptions\IOException
+     * @throws \SleekDB\Exceptions\IdNotAllowedException
+     * @throws \SleekDB\Exceptions\InvalidArgumentException
+     * @throws \SleekDB\Exceptions\InvalidConfigurationException
+     * @throws \SleekDB\Exceptions\JsonException
      */
-    private function getRandomString($len = 32, $chars = null): string
+    public function refreshSession(AccountInterface $account, string $clientToken): ?array
     {
-        if (is_null($chars)) {
-            $chars = self::CHARS_LOWERS . self::CHARS_UPPERS . self::CHARS_DIGITS;
-        }
-        for ($i = 0, $str = '', $lc = strlen($chars)-1; $i < $len; $i++) {
-            $str .= $chars[random_int(0, $lc)];
+        $sessions = $this->getSessionStore()->findBy(['accountUuid', '=', $account->getUuid()]);
+        $currentSession = current($sessions);
+        $accessToken = $currentSession['accessToken'] ?? $this->generateAccessToken();
+
+        // Delete outdated sessions
+        if (count($sessions) > 1) {
+            foreach ($sessions as $session) {
+                if ($currentSession['_id'] != $session['_id']) {
+                    $this->getSessionStore()->deleteById($session['_id']);
+                }
+            }
         }
 
-        return $str;
+        // Update or create session
+        if ($currentSession) {
+            $this->getSessionStore()->updateById($currentSession['_id'], [
+                'accountId'   => $account->getId(),
+                'accountUuid' => $account->getUuid(),
+                'accessToken' => $accessToken,
+                'clientToken' => $clientToken,
+            ]);
+        } else {
+            $this->getSessionStore()->insert([
+                'accountId'   => $account->getId(),
+                'accountUuid' => $account->getUuid(),
+                'accessToken' => $accessToken,
+                'clientToken' => $clientToken,
+            ]);
+        }
+
+        $array = $this->accountToArray($account);
+        $array['accessToken'] = $accessToken;
+        $array['clientToken'] = $clientToken;
+
+        return $array;
     }
 
     /**
@@ -140,41 +162,7 @@ class Authenticator implements AuthenticatorInterface
     public function authenticateByPassword(AccountInterface $account, string $password, string $clientToken): ?array
     {
         if ($this->checkPassword($account, $password)) {
-            $accessToken = $this->generateAccessToken();
-            $sessions = $this->getSessionStore()->findBy(['accountUuid', '=', $account->getUuid()]);
-            $currentSession = current($sessions);
-
-            // Delete outdated sessions
-            if (count($sessions) > 1) {
-                foreach ($sessions as $session) {
-                    if ($currentSession['_id'] != $session['_id']) {
-                        $this->getSessionStore()->deleteById($session['_id']);
-                    }
-                }
-            }
-
-            // Update or create session
-            if ($currentSession) {
-                $this->getSessionStore()->updateById($currentSession['_id'], [
-                    'accountId'   => $account->getId(),
-                    'accountUuid' => $account->getUuid(),
-                    'accessToken' => $accessToken,
-                    'clientToken' => $clientToken,
-                ]);
-            } else {
-                $this->getSessionStore()->insert([
-                    'accountId'   => $account->getId(),
-                    'accountUuid' => $account->getUuid(),
-                    'accessToken' => $accessToken,
-                    'clientToken' => $clientToken,
-                ]);
-            }
-
-            $array = $this->accountToArray($account);
-            $array['accessToken'] = $accessToken;
-            $array['clientToken'] = $clientToken;
-
-            return $array;
+            return $this->refreshSession($account, $clientToken);
         }
 
         return null;
@@ -351,6 +339,7 @@ class Authenticator implements AuthenticatorInterface
                 'profileId' => $account->getSelectedProfile()->getId(),
                 'profileName' => $account->getSelectedProfile()->getName(),
                 'textures' => $textures,
-            ], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)
+        );
     }
 }

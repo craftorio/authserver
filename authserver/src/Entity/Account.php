@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Craftorio\Authserver\Entity;
 
 use Craftorio\Authserver\Entity\Account\Profile;
@@ -19,6 +21,7 @@ class Account implements AccountInterface
     private $passwordHash;
     private $ipAddress;
     private $selectedProfile;
+    private $externalId;
 
     /**
      * Account constructor.
@@ -27,11 +30,12 @@ class Account implements AccountInterface
     public function __construct(array $rawData = [])
     {
         $this->id = $rawData['_id'] ?? $rawData['id'] ?? null;
-        $this->uuid = $rawData['uuid'] ?? $this->id ? Uuid::fromString(md5($this->id)) : Uuid::uuid4();
+        $this->uuid = (string) ($rawData['uuid'] ?? ($this->id ? Uuid::fromString(md5($this->id)) : Uuid::uuid4()));
         $this->username = $rawData['username'] ?? null;
         $this->email = $rawData['email'] ?? null;
         $this->passwordHash = $rawData['password_hash'] ?? null;
         $this->ipAddress = $rawData['ip_address'] ?? null;
+        $this->externalId = $rawData['external_id'] ?? null;
 
         if (!$this->email || !$this->username || !$this->passwordHash) {
             throw new \RuntimeException('Following fields are required: email, username, password_hash');
@@ -41,12 +45,13 @@ class Account implements AccountInterface
             $this->selectedProfile = !empty($rawData['selected_profile']) ? new Profile($rawData['selected_profile']) : null;
         } else {
             $this->selectedProfile = new Profile([
-                'uuid' => Uuid::fromString(md5($this->uuid)),
-                'name' => ucfirst($this->username)
+                'uuid' => (string) Uuid::fromString(md5($this->uuid)),
+                'name' => $this->username
             ]);
         }
 
         if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
+            print_r($rawData);
             throw new \RuntimeException('Invalid email address: "' . $this->email . '"');
         }
     }
@@ -116,6 +121,23 @@ class Account implements AccountInterface
     }
 
     /**
+     * @param string $id
+     * @return mixed|void
+     */
+    public function setExternalId(string $id)
+    {
+        $this->externalId = $id;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getExternalId(): ?string
+    {
+        return $this->externalId;
+    }
+
+    /**
      * @return array
      */
     public function jsonSerialize(): array
@@ -126,7 +148,8 @@ class Account implements AccountInterface
             'email' => $this->getEmail(),
             'password_hash' => $this->getPasswordHash(),
             'ip_address' => $this->getIpAddress(),
-            'selected_profile' => $this->getSelectedProfile()
+            'external_id' => $this->getExternalId(),
+            'selected_profile' => $this->getSelectedProfile(),
         ];
     }
 }

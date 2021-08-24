@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Craftorio\Authserver;
 
+use Craftorio\Authserver\Hash;
 use Craftorio\Authserver\Route\RouteInterface;
 
 /**
@@ -10,10 +13,14 @@ use Craftorio\Authserver\Route\RouteInterface;
  */
 class Authserver
 {
+    /**
+     * @var string[]
+     */
     private $routes = [
         Route\Home::class,
         Route\Texture::class,
         Route\Authenticate::class,
+        Route\Refresh::class,
         Route\SessionMinecraftJoin::class,
         Route\SessionMinecraftHasJoined::class,
     ];
@@ -37,26 +44,58 @@ class Authserver
      */
     protected function configureDI(): void
     {
-        $container = new \DI\Container();
-
-        $container->set(
+        $this->container = new \DI\Container();
+        $this->container->set(
             Config::class,
             \DI\factory(static function () {
                 return new Config([]);
             })
         );
 
-        $container->set(
+        $this->container->set(
+            Hash\HashInterface::class,
+            \DI\autowire($this->resolveHashAlgorithm())
+        );
+
+        $this->container->set(
             Authenticator\AuthenticatorInterface::class,
-            \DI\autowire($container->get(Config::class)->get('classAuthenticator'))
+            \DI\autowire(Authenticator\Authenticator::class)
         );
 
-        $container->set(
+        $this->container->set(
             Account\Storage\StorageInterface::class,
-            \DI\autowire($container->get(Config::class)->get('classAccountStorage'))
+            \DI\autowire($this->resolveAccountStorage())
         );
+    }
 
-        $this->container = $container;
+    /**
+     * @return string
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    private function resolveAccountStorage(): string
+    {
+        switch ($this->container->get(Config::class)->get('account.storage')) {
+            case 'mysql':
+                return Account\Storage\Mysql::class;
+            default:
+                return Account\Storage\SleekDb::class;
+        }
+    }
+
+    /**
+     * @return string
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    private function resolveHashAlgorithm(): string
+    {
+        switch ($this->container->get(Config::class)->get('account.hash_algorithm')) {
+            case 'md5':
+                return Hash\Md5::class;
+            default:
+                return Hash\Phpass::class;
+        }
     }
 
     /**
