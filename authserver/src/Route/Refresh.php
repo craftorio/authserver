@@ -67,7 +67,7 @@ class Refresh implements RouteInterface
             ['clientToken', '=', $clientToken],
         ]);
 
-        if (!$session) {
+        if (!$session || !$session['accountId']) {
             \Flight::json([
                 "error" => "ForbiddenOperationException", // Package ca.uhn.fhir.rest.server.exceptions
                 "errorMessage" => "Invalid credentials. Invalid username or password."
