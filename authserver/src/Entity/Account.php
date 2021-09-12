@@ -29,7 +29,7 @@ class Account implements AccountInterface
      */
     public function __construct(array $rawData = [])
     {
-        $this->id = $rawData['_id'] ?? $rawData['id'] ?? null;
+        $this->id = ((string) ($rawData['_id'] ?? $rawData['id'] ?? null)) ?? null;
         $this->uuid = (string) ($rawData['uuid'] ?? ($this->id ? Uuid::fromString(md5($this->id)) : Uuid::uuid4()));
         $this->username = $rawData['username'] ?? null;
         $this->email = $rawData['email'] ?? null;
@@ -143,6 +143,7 @@ class Account implements AccountInterface
     public function jsonSerialize(): array
     {
         return [
+            'id' => $this->getId(),
             'uuid' => $this->getUuid(),
             'username' => $this->getUsername(),
             'email' => $this->getEmail(),

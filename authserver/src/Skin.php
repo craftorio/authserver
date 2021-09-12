@@ -41,7 +41,7 @@ class Skin
             }
 
             $config = [
-                "auto_cache" => true,
+                "auto_cache" => false,
                 "cache_lifetime" => null,
                 "timeout" => false,
                 "primary_key" => "_id",

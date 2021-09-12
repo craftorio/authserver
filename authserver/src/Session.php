@@ -42,7 +42,7 @@ class Session
             }
 
             $config = [
-                "auto_cache" => true,
+                "auto_cache" => false,
                 "cache_lifetime" => 900,
                 "timeout" => false,
                 "primary_key" => "_id",
@@ -77,7 +77,7 @@ class Session
             }
 
             $config = [
-                "auto_cache" => true,
+                "auto_cache" => false,
                 "cache_lifetime" => 900,
                 "timeout" => false,
                 "primary_key" => "_id",

@@ -35,7 +35,7 @@ class SleekDb extends StorageAbstract
         }
 
         $accountsConfig = [
-            "auto_cache" => true,
+            "auto_cache" => false,
             "cache_lifetime" => $cacheLifetime,
             "timeout" => false,
             "primary_key" => "_id",
