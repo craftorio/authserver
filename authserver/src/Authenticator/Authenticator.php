@@ -225,8 +225,8 @@ class Authenticator implements AuthenticatorInterface
 
         $serverSessionData = $this->getServerSessionStore()->findOneBy([
             ['accountUuid', '=', $account->getUuid()],
-            'AND',
-            ['serverId', '=', $serverId]
+//            'AND',
+//            ['serverId', '=', $serverId]
         ]) ?? [];
 
         $serverSessionData['accessToken'] = $accessToken;
