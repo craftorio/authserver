@@ -56,13 +56,12 @@ class SessionMinecraftHasJoined implements RouteInterface
             \Flight::json($sessionInfo);
         } catch (UnauthorizedException $e) {
             \Flight::response()->status(401)->send();
+
             return;
         } catch (\Throwable $e) {
-            \Flight::response()->status(400)->send();
+            \Flight::response()->status(500)->send();
 
             return;
         }
-
-        \Flight::response()->status(204)->send();
     }
 }
