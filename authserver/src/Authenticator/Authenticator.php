@@ -256,8 +256,8 @@ class Authenticator implements AuthenticatorInterface
     {
         $serverSessionData = $this->getServerSessionStore()->findOneBy([
             ['username', '=', $username],
-            'AND',
-            ['serverId', '=', $serverId]
+//            'AND',
+//            ['serverId', '=', $serverId]
         ]);
 
         if (!$serverSessionData) {
