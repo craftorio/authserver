@@ -32,7 +32,7 @@ class Profile implements ProfileInterface
      */
     public function getId(): string
     {
-        return $this->getId();
+        return $this->id;
     }
 
     /**
