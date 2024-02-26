@@ -70,7 +70,8 @@ class Refresh implements RouteInterface
         if (!$session || !$session['accountId']) {
             \Flight::json([
                 "error" => "ForbiddenOperationException", // Package ca.uhn.fhir.rest.server.exceptions
-                "errorMessage" => "Invalid credentials. Invalid username or password."
+                "errorMessage" => "Invalid credentials. Invalid username or password.",
+                "error_code" => "SESSION_NOT_FOUND",
             ], 403);
 
             return;
@@ -80,7 +81,8 @@ class Refresh implements RouteInterface
         if (!$account) {
             \Flight::json([
                 "error" => "ForbiddenOperationException", // Package ca.uhn.fhir.rest.server.exceptions
-                "errorMessage" => "Invalid credentials. Invalid username or password."
+                "errorMessage" => "Invalid credentials. Invalid username or password.",
+                "error_code" => "ACCOUNT_NOT_FOUND",
             ], 403);
 
             return;
@@ -90,7 +92,8 @@ class Refresh implements RouteInterface
         if (!$sessionInfo) {
             \Flight::json([
                 "error" => "ForbiddenOperationException",
-                "errorMessage" => "Invalid credentials. Invalid username or password."
+                "errorMessage" => "Invalid credentials. Invalid username or password.",
+                "error_code" => "SESSION_INFO_NOT_FOUND",
             ], 403);
 
             return;
