@@ -27,11 +27,8 @@ class Texture implements RouteInterface
     public function __invoke(...$args)
     {
         header ('Content-Type: image/png');
-
         [$hash] = $args;
-
         $skin = $this->skin->getStore()->findOneBy(['hash', '=', $hash]) ?? [];
-        
 
         if (!empty($skin['path']) && is_readable($skin['path'])) {    
             header("Content-length: " . filesize($skin['path']));

@@ -7,6 +7,7 @@ namespace Craftorio\Authserver\Authenticator;
 use Craftorio\Authserver\Authenticator\Exception\UnauthorizedException;
 use Craftorio\Authserver\Config;
 use Craftorio\Authserver\Entity\AccountInterface;
+use Craftorio\Authserver\Entity;
 use Craftorio\Authserver\Hash\HashInterface;
 use Craftorio\Authserver\Session;
 use Craftorio\Authserver\Skin;
@@ -328,9 +329,9 @@ class Authenticator implements AuthenticatorInterface
     {
         $textures = [];
         //$skin = $this->getSkinStore()->findOneBy(['profile_uuid', '=', $account->getSelectedProfile()->getUuid()]) ?? [];
-        $skin['account_id'] = $account->getId();
-        $skin['account_username'] = $account->getUsername();
-        $skin['profile_uuid'] = $account->getSelectedProfile()->getUuid();
+        $skin['id'] = $account->getId();
+        $skin['username'] = $account->getUsername();
+        $skin['uuid'] = $account->getSelectedProfile()->getUuid();
         $skin['timestamp'] = time() * 1000;
         $skin['hash'] = hash('sha256', $account->getSelectedProfile()->getName());
 
@@ -346,8 +347,13 @@ class Authenticator implements AuthenticatorInterface
         }
         
         $skin['path'] = $path;
-        $this->getSkinStore()->insert($skin);    
-        $textures['SKIN']['url'] = "https://textures.minecraft.net/texture/{$skin['hash']}";
+        $skinEntity = new Entity\Skin($skin);
+        $this->getSkinStore()->insert($skinEntity->jsonSerialize());
+        $textures = [
+            'SKIN' => [
+                'url' => "https://textures.minecraft.net/texture/{$skin['hash']}",
+            ]
+        ];
 
         return base64_encode(
             json_encode([
