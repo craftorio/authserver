@@ -24,10 +24,10 @@ class Texture implements RouteInterface
         return 'GET /texture/@hash';
     }
 
-    public function __invoke(string $hash)
+    public function __invoke(...$args)
     {
         header ('Content-Type: image/png');
-        $skin = $this->skin->getStore()->findOneBy(['hash', '=', $hash]) ?? [];
+        $skin = $this->skin->getStore()->findOneBy(['hash', '=', $args[0]]) ?? [];
 
         if (!empty($skin['path']) && is_readable($skin['path'])) {    
             header("Content-length: " . filesize($skin['path']));

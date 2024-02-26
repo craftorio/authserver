@@ -28,8 +28,8 @@ class SessionMinecraftProfile implements RouteInterface
         return 'GET /session/minecraft/profile/@profile';
     }
 
-    public function __invoke(string $profile)
+    public function __invoke(...$args)
     {
-        \Flight::json($this->authenticator->getProfile($profile));
+        \Flight::json($this->authenticator->getProfile($args[0]));
     }
 }
