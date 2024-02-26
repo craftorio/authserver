@@ -56,7 +56,9 @@ class GenerateCommand extends Command
             return 1;
         }
 
-        mkdir($exportDir, 0755, true);
+        if (!is_dir($exportDir)) {
+            mkdir($exportDir, 0755, true);
+        }
 
         // Generate private key
         if (openssl_pkey_export($key, $export)) {
