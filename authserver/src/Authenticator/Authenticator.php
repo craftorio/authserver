@@ -292,6 +292,11 @@ class Authenticator implements AuthenticatorInterface
 //            'AND',
 //            ['serverId', '=', $serverId]
         ]);
+        
+        if (empty($serverSessionData['accountId'])) {
+            return[];
+        }
+
         $account = $this->accountStorage->findById($serverSessionData['accountId']);
 
         return [
