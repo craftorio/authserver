@@ -46,7 +46,7 @@ class GenerateCommand extends Command
     {
         // Generate the key
         $key = openssl_pkey_new([
-            "private_key_bits" => 5120,
+            "private_key_bits" => 4096,
             "private_key_type" => OPENSSL_KEYTYPE_RSA,
         ]);
 
