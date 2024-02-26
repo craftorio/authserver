@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Craftorio\Authserver\Route;
 
 use Craftorio\Authserver\Authenticator\AuthenticatorInterface;
-use Craftorio\Authserver\Skin;
 
 /**
  * Interface RouteInterface
  * @package Craftorio\Route
  */
-class Profile implements RouteInterface
+class SessionMinecraftProfile implements RouteInterface
 {
     private $authenticator;
 
@@ -26,7 +25,7 @@ class Profile implements RouteInterface
 
     public function getPath(): string
     {
-        return 'GET /profile/@profile_id';
+        return 'GET /session/minecraft/profile/@profile_id';
     }
 
     public function __invoke(...$args)

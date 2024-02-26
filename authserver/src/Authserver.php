@@ -19,11 +19,11 @@ class Authserver
     private $routes = [
         Route\Home::class,
         Route\Texture::class,
-        Route\Profile::class,
         Route\Authenticate::class,
         Route\Refresh::class,
         Route\SessionMinecraftJoin::class,
         Route\SessionMinecraftHasJoined::class,
+        Route\SessionMinecraftProfile::class,
     ];
 
     /** @var \DI\Container */
