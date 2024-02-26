@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Craftorio\Authserver\Route;
 
 use Craftorio\Authserver\Authenticator\AuthenticatorInterface;
+use stdClass;
 
 /**
  * Interface RouteInterface
@@ -30,6 +31,8 @@ class SessionMinecraftProfile implements RouteInterface
 
     public function __invoke(...$args)
     {
-        \Flight::json($this->authenticator->getProfile($args[0]));
+        $profile = $this->authenticator->getProfile($args[0]);
+
+        \Flight::json($profile ? $profile : new stdClass());
     }
 }

@@ -12,6 +12,7 @@ use Craftorio\Authserver\Hash\HashInterface;
 use Craftorio\Authserver\Session;
 use Craftorio\Authserver\Skin;
 use Craftorio\Authserver\Account\Storage\StorageInterface;
+use stdClass;
 
 /**
  * Interface StorageInterface
@@ -294,7 +295,7 @@ class Authenticator implements AuthenticatorInterface
         ]);
 
         if (empty($sessionData['accountId'])) {
-            return[];
+            return [];
         }
 
         $account = $this->accountStorage->findById($sessionData['accountId']);
