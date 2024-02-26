@@ -83,8 +83,8 @@ class GenerateCommand extends Command
         // Create the jar file
         $zipFile = new \PhpZip\ZipFile();
         $zipFile
-            ->addFromString('yggdrasil_session_public.der', $der)
-            ->saveAsFile($exportDir . DIRECTORY_SEPARATOR . 'yggdrasil_session_public.jar')
+            ->addFromString('yggdrasil_session_pubkey.der', $der)
+            ->saveAsFile($exportDir . DIRECTORY_SEPARATOR . 'yggdrasil_session_pubkey.jar')
             ->close();
 
         $output->writeln("New certificates saved to: {$exportDir}");
