@@ -42,6 +42,11 @@ class Config extends AbstractConfig
             'sleekDb' => [
                 'dataDir' => 'var/storage',
             ],
+            'skinDir' => $this->baseDir
+                . DIRECTORY_SEPARATOR
+                . 'var'
+                . DIRECTORY_SEPARATOR
+                . 'skins',
             'certificatesDir' => $this->baseDir
                 . DIRECTORY_SEPARATOR
                 . 'var'

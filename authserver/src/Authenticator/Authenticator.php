@@ -195,7 +195,7 @@ class Authenticator implements AuthenticatorInterface
             "selectedProfile" => $account->getSelectedProfile(),
             "user" => [
                 "id" => md5($account->getUuid() ?? $account->getId()),
-                "username" => "sergey@cherepanov.org.ua",
+                "username" => $account->getUsername(),
             ]
         ];
     }
@@ -327,18 +327,34 @@ class Authenticator implements AuthenticatorInterface
     public function getTextures(AccountInterface $account): string
     {
         $textures = [];
-        $skin = $this->getSkinStore()->findOneBy(['profile_uuid', '=', $account->getSelectedProfile()->getUuid()]) ?? [];
-        if (!empty($skin['hash'])) {
-            $textures['SKIN']['url'] = "https://textures.minecraft.net/texture/{$skin['hash']}";
+        //$skin = $this->getSkinStore()->findOneBy(['profile_uuid', '=', $account->getSelectedProfile()->getUuid()]) ?? [];
+        $skin['account_id'] = $account->getId();
+        $skin['account_username'] = $account->getUsername();
+        $skin['profile_uuid'] = $account->getSelectedProfile()->getUuid();
+        $skin['timestamp'] = time() * 1000;
+        $skin['hash'] = hash('sha256', $account->getSelectedProfile()->getName());
+
+        $basePath = $this->config->get('skinDir') . DIRECTORY_SEPARATOR . strtolower($account->getUsername());
+        $path =  null;
+        if (is_dir($basePath)) {
+            foreach (scandir($basePath) as $file) {
+                if (is_file("{$basePath}/{$file}")) {
+                    $path = "{$basePath}/{$file}";
+                    break;
+                }
+            }
         }
-        $timestamp = $skin['timestamp'] ?? time() * 1000;
+        
+        $skin['path'] = $path;
+        $this->getSkinStore()->insert($skin);    
+        $textures['SKIN']['url'] = "https://textures.minecraft.net/texture/{$skin['hash']}";
 
         return base64_encode(
             json_encode([
-                'timestamp' => $timestamp,
+                'timestamp' => $skin['timestamp'],
                 'profileId' => $account->getSelectedProfile()->getId(),
                 'profileName' => $account->getSelectedProfile()->getName(),
-                'textures' => $textures,
+                'textures' => $path ? $textures : [],
             ], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)
         );
     }
