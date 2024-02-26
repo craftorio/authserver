@@ -287,17 +287,17 @@ class Authenticator implements AuthenticatorInterface
      */
     public function getProfile(string $profileId): array
     {
-        $serverSessionData = $this->getServerSessionStore()->findOneBy([
+        $sessionData = $this->getSessionStore()->findOneBy([
             ['profileId', '=', $profileId],
 //            'AND',
 //            ['serverId', '=', $serverId]
         ]);
-        
-        if (empty($serverSessionData['accountId'])) {
+
+        if (empty($sessionData['accountId'])) {
             return[];
         }
 
-        $account = $this->accountStorage->findById($serverSessionData['accountId']);
+        $account = $this->accountStorage->findById($sessionData['accountId']);
 
         return [
             'id' => $profileId,
