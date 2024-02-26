@@ -41,14 +41,14 @@ class Account implements AccountInterface
             throw new \RuntimeException('Following fields are required: email, username, password_hash');
         }
 
-        if (!empty($rawData['selected_profile'])) {
-            $this->selectedProfile = !empty($rawData['selected_profile']) ? new Profile($rawData['selected_profile']) : null;
-        } else {
+        // if (!empty($rawData['selected_profile'])) {
+        //     $this->selectedProfile = !empty($rawData['selected_profile']) ? new Profile($rawData['selected_profile']) : null;
+        // } else {
             $this->selectedProfile = new Profile([
                 'uuid' => (string) Uuid::fromString(md5($this->uuid)),
                 'name' => $this->username
             ]);
-        }
+        // }
 
         if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
             print_r($rawData);
