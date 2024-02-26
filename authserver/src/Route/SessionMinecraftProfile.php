@@ -33,6 +33,6 @@ class SessionMinecraftProfile implements RouteInterface
     {
         $profile = $this->authenticator->getProfile($args[0]);
 
-        \Flight::json($profile ? $profile : new stdClass());
+        \Flight::json($profile ? $profile : null);
     }
 }
