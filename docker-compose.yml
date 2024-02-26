@@ -9,6 +9,7 @@ services:
         volumes:
             - 'authserver-composer-home:/tmp/.composer'
             - './authserver:/var/www/authserver'
+            - '/var/www/launcher/MinecraftSkins:/var/www/authserver/var/skins'
             - './docker/php/php.ini:/home/linuxbrew/.linuxbrew/etc/php/7.3/php.ini:ro'
             - './docker/php/prepend.php:/home/linuxbrew/.linuxbrew/etc/php/7.3/prepend.php:ro'
             - './docker/php/msmtprc:/home/linuxbrew/.msmtprc:ro'
@@ -27,6 +28,7 @@ services:
         volumes:
             - 'authserver-composer-home:/tmp/.composer'
             - './authserver:/var/www/authserver'
+            - '/var/www/launcher/MinecraftSkins:/var/www/authserver/var/skins'
             - './docker/php/php-fpm.conf:/home/linuxbrew/.linuxbrew/etc/php/7.3/php-fpm.conf:ro'
             - './docker/php/php.ini:/home/linuxbrew/.linuxbrew/etc/php/7.3/php.ini:ro'
             - './docker/php/prepend.php:/home/linuxbrew/.linuxbrew/etc/php/7.3/prepend.php:ro'
