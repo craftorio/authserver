@@ -38,4 +38,10 @@ interface AuthenticatorInterface
      * @return array
      */
     public function authenticateByPassword(AccountInterface $account, string $password, string $clientToken): ?array;
+
+    /**
+     * @param string $profileId
+     * @return array
+     */
+    public function getProfile(string $profileId): array;
 }

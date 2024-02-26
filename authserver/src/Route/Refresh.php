@@ -10,8 +10,8 @@ use Craftorio\Authserver\Authenticator\AuthenticatorInterface;
 use Craftorio\Authserver\Session;
 
 /**
- * Interface StorageInterface
- * @package Craftorio\Authserver\AccountStorage
+ * Interface RouteInterface
+ * @package Craftorio\Route
  */
 class Refresh implements RouteInterface
 {

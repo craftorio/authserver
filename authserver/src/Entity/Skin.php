@@ -13,7 +13,8 @@ use Ramsey\Uuid\Uuid;
 class Skin implements SkinInterface
 {
     private $id;
-    private $uuid;
+    private $profile_uuid;
+    private $profile_id;
     private $username;
     private $hash;
     private $path;
@@ -25,8 +26,9 @@ class Skin implements SkinInterface
      */
     public function __construct(array $rawData)
     {
-        $this->uuid = (string) $rawData['uuid'] ?? Uuid::uuid4();
         $this->id = (string) $rawData['id'];
+        $this->profile_uuid = (string) $rawData['profile_uuid'] ?? Uuid::uuid4();
+        $this->profile_id = (string) $rawData['profile_id'] ?? Uuid::uuid4();
         $this->username = (string) $rawData['username'] ?? 'Unnamed';
         $this->hash = (string) $rawData['hash'];
         $this->path = (string) $rawData['path'];
@@ -44,9 +46,17 @@ class Skin implements SkinInterface
     /**
      * @return string
      */
-    public function getUuid(): string
+    public function getProfileUuid(): string
     {
-        return $this->uuid;
+        return $this->profile_uuid;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProfileId(): string
+    {
+        return $this->profile_id;
     }
 
     /**
@@ -88,7 +98,8 @@ class Skin implements SkinInterface
     {
         return [
             'id' => $this->id,
-            'uuid' => $this->uuid,
+            'profile_uuid' => $this->profile_uuid,
+            'profile_id' => $this->profile_id,
             'hash' => $this->hash,
             'path' => $this->path,
         ];

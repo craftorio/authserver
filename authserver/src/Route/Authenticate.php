@@ -9,8 +9,8 @@ use Craftorio\Authserver\Account\Storage\StorageInterface;
 use Craftorio\Authserver\Authenticator\AuthenticatorInterface;
 
 /**
- * Interface StorageInterface
- * @package Craftorio\Authserver\AccountStorage
+ * Interface RouteInterface
+ * @package Craftorio\Route
  */
 class Authenticate implements RouteInterface
 {

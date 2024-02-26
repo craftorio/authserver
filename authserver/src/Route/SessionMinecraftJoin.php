@@ -9,8 +9,8 @@ use Craftorio\Authserver\Authenticator\AuthenticatorInterface;
 use Craftorio\Authserver\Authenticator\Exception\UnauthorizedException;
 
 /**
- * Interface StorageInterface
- * @package Craftorio\Authserver\AccountStorage
+ * Interface RouteInterface
+ * @package Craftorio\Route
  */
 class SessionMinecraftJoin implements RouteInterface
 {

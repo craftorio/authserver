@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Craftorio\Authserver\Route;
 
 /**
- * Interface StorageInterface
- * @package Craftorio\Authserver\AccountStorage
+ * @package Craftorio\Route
  */
 interface RouteInterface
 {

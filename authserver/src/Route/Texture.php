@@ -7,8 +7,8 @@ namespace Craftorio\Authserver\Route;
 use Craftorio\Authserver\Skin;
 
 /**
- * Interface StorageInterface
- * @package Craftorio\Authserver\AccountStorage
+ * Interface RouteInterface
+ * @package Craftorio\Route
  */
 class Texture implements RouteInterface
 {

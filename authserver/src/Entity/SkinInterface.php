@@ -15,7 +15,12 @@ interface SkinInterface extends \JsonSerializable
     /**
      * @return string
      */
-    public function getUuid(): string;
+    public function getProfileUuid(): string;
+
+    /**
+     * @return string
+     */
+    public function getProfileId(): string;
 
     /**
      * @return string

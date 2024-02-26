@@ -130,6 +130,8 @@ class Authenticator implements AuthenticatorInterface
             $this->getSessionStore()->updateById($currentSession['_id'], [
                 'accountId'   => $account->getId(),
                 'accountUuid' => $account->getUuid(),
+                'profileId'   => $account->getSelectedProfile()->getId(),
+                'profileUuid' => $account->getSelectedProfile()->getUuid(),
                 'accessToken' => $accessToken,
                 'clientToken' => $clientToken,
             ]);
@@ -137,6 +139,8 @@ class Authenticator implements AuthenticatorInterface
             $this->getSessionStore()->insert([
                 'accountId'   => $account->getId(),
                 'accountUuid' => $account->getUuid(),
+                'profileId'   => $account->getSelectedProfile()->getId(),
+                'profileUuid' => $account->getSelectedProfile()->getUuid(),
                 'accessToken' => $accessToken,
                 'clientToken' => $clientToken,
             ]);
@@ -278,6 +282,26 @@ class Authenticator implements AuthenticatorInterface
     }
 
     /**
+     * @param string $profileId
+     * @return array
+     */
+    public function getProfile(string $profileId): array
+    {
+        $serverSessionData = $this->getServerSessionStore()->findOneBy([
+            ['profileId', '=', $profileId],
+//            'AND',
+//            ['serverId', '=', $serverId]
+        ]);
+        $account = $this->accountStorage->findById($serverSessionData['accountId']);
+
+        return [
+            'id' => $profileId,
+            'name' => $account->getUsername(),
+            'properties' => $this->getProperties($account)
+        ];
+    }
+
+    /**
      * @param AccountInterface $account
      * @return array[]
      * @throws \SleekDB\Exceptions\IOException
@@ -331,7 +355,8 @@ class Authenticator implements AuthenticatorInterface
         //$skin = $this->getSkinStore()->findOneBy(['profile_uuid', '=', $account->getSelectedProfile()->getUuid()]) ?? [];
         $skin['id'] = $account->getId();
         $skin['username'] = $account->getUsername();
-        $skin['uuid'] = $account->getSelectedProfile()->getUuid();
+        $skin['profile_uuid'] = $account->getSelectedProfile()->getUuid();
+        $skin['profile_id'] = $account->getSelectedProfile()->getId();
         $skin['timestamp'] = time() * 1000;
         $skin['hash'] = hash('sha256', $account->getSelectedProfile()->getName());
 
