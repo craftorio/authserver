@@ -26,7 +26,7 @@ class Skin implements SkinInterface
     public function __construct(array $rawData)
     {
         $this->uuid = (string) $rawData['uuid'] ?? Uuid::uuid4();
-        $this->id = (string) $rawData['account_id'];
+        $this->id = (string) $rawData['id'];
         $this->username = (string) $rawData['username'] ?? 'Unnamed';
         $this->hash = (string) $rawData['hash'];
         $this->path = (string) $rawData['path'];
