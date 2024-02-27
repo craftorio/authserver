@@ -379,7 +379,18 @@ class Authenticator implements AuthenticatorInterface
         
         $skin['path'] = $path;
         $skinEntity = new Entity\Skin($skin);
-        $this->getSkinStore()->insert($skinEntity->jsonSerialize());
+        $skins = $this->getSkinStore()->findBy(['profile_id', '=', $account->getUuid()]);
+        if (count($skins) > 1) {
+            $this->getSkinStore()->update(array_merge(array_shift($skins), $skinEntity->jsonSerialize()));
+            while ($skin = array_shift($skins)) {
+                $this->getSkinStore()->deleteById($skin['_id']);
+            }
+        } else if (count($skins) > 0) {
+            $this->getSkinStore()->update(array_merge(array_shift($skins), $skinEntity->jsonSerialize()));
+        } else {
+            $this->getSkinStore()->insert($skinEntity->jsonSerialize());
+        }
+        
         $textures = [
             'SKIN' => [
                 'url' => "https://textures.minecraft.net/texture/{$skin['hash']}",
