@@ -26,15 +26,15 @@ class Texture implements RouteInterface
 
     public function __invoke(...$args)
     {
-        header ('Content-Type: image/png');
         $skin = $this->skin->getStore()->findOneBy(['hash', '=', $args[0]]) ?? [];
 
         if (!empty($skin['path']) && is_readable($skin['path'])) {    
-            header("Content-length: " . filesize($skin['path']));
+            header ('Content-Type: image/png');
+            header ("Content-length: " . filesize($skin['path']));
 
             echo file_get_contents($skin['path']);
         } else {
-            header("Content-length: 0");
+            \Flight::response()->status(404)->send();
         }
     }
 }
