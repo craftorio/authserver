@@ -364,10 +364,9 @@ class Authenticator implements AuthenticatorInterface
         $skin['profile_uuid'] = $account->getSelectedProfile()->getUuid();
         $skin['profile_id'] = $account->getSelectedProfile()->getId();
         $skin['timestamp'] = time() * 1000;
-        $skin['hash'] = hash('sha256', $account->getSelectedProfile()->getName());
 
         $basePath = $this->config->get('skinDir') . DIRECTORY_SEPARATOR . strtolower($account->getUsername());
-        $path =  null;
+        $path = '';
         if (is_dir($basePath)) {
             foreach (scandir($basePath) as $file) {
                 if (is_file("{$basePath}/{$file}")) {
@@ -377,6 +376,7 @@ class Authenticator implements AuthenticatorInterface
             }
         }
         
+        $skin['hash'] = hash('sha256', $path);
         $skin['path'] = $path;
         $skinEntity = new Entity\Skin($skin);
         $this->getSkinStore()->deleteBy(['id', '=', $account->getId()]);
